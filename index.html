@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tire Inventory Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgb(93,129,190);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .input-container label {
+            margin-right: 10px;
+        }
+
+        .inventory {
+            margin-top: 30px;
+            border-collapse: collapse;
+            width: 50%;
+        }
+
+        .inventory th,
+        .inventory td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .inventory th {
+            background-color: #f2f2f2;
+        } 
+
+      
+    </style>
+</head>
+<body>
+   
+    <h1>Tire Inventory Management</h1>
+
+    <div class="input-container">
+        <label for="brand">Brand:</label>
+        <input type="text" id="brand">
+    </div>
+    <div class="input-container">
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity">
+    </div>
+    <div class="input-container">
+        <label for="width">Width:</label>
+        <input type="number" id="width">
+    </div>
+    <div class="input-container">
+        <label for="aspectRatio">Aspect Ratio:</label>
+        <input type="number" id="aspectRatio">
+    </div>
+    <div class="input-container">
+        <label for="rimDiameter">Rim Diameter:</label>
+        <input type="number" id="rimDiameter">
+    </div>
+    <button onclick="addTires()">Add Tires</button>
+
+    <h2>Sell Tires</h2>
+    <div class="input-container">
+        <label for="sellBrand">Brand:</label>
+        <input type="text" id="sellBrand" placeholder="write like in inventory">
+    </div>
+    <div class="input-container">
+        <label for="sellQuantity">Quantity:</label>
+        <input type="number" id="sellQuantity">
+    </div>
+    <div class="input-container">
+        <label for="sellWidth">Width:</label>
+        <input type="number" id="sellWidth">
+    </div>
+    <div class="input-container">
+        <label for="sellAspectRatio">Aspect Ratio:</label>
+        <input type="number" id="sellAspectRatio">
+    </div>
+    <div class="input-container">
+        <label for="sellRimDiameter">Rim Diameter:</label>
+        <input type="number" id="sellRimDiameter">
+    </div>
+    <div class="input-container">
+        <label for="sellNotes">Notes:</label>
+        <input type="text" id="sellNotes">
+    </div>
+    <button onclick="sellTires()">Sell Tires</button>
+
+    <h2>Current Inventory</h2>
+    <table class="inventory">
+        <thead>
+            <tr>
+                <th>Brand</th>
+                <th>Quantity</th>
+                <th>Size</th>
+            </tr>
+        </thead>
+        <tbody id="inventoryBody">
+            <!-- Inventory items will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <h2>Tires Sold</h2>
+    <div id="tiresSold">
+        <!-- Sold tires information will be dynamically added here -->
+    </div>
+
+    <script> 
+       
+        // Function to add tires to inventory
+       // Function to add tires to inventory
+// Function to add tires to inventory
+function addTires() {
+    const brandInput = document.getElementById("brand");
+    const quantityInput = document.getElementById("quantity");
+    const widthInput = document.getElementById("width");
+    const aspectRatioInput = document.getElementById("aspectRatio");
+    const rimDiameterInput = document.getElementById("rimDiameter");
+
+    const brand = brandInput.value.trim();
+    const quantity = parseInt(quantityInput.value);
+    const width = parseInt(widthInput.value);
+    const aspectRatio = parseInt(aspectRatioInput.value);
+    const rimDiameter = parseInt(rimDiameterInput.value);
+
+    if (brand && !isNaN(quantity) && !isNaN(width) && !isNaN(aspectRatio) && !isNaN(rimDiameter)) {
+        const size = `${width}/${aspectRatio}R${rimDiameter}`;
+        const tire = { brand, quantity, size };
+
+        fetch('/api/add-tires', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(tire),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to add tires to inventory.');
+            }
+            // Refresh inventory after adding tires
+            updateInventory();
+            // Clear input fields
+            brandInput.value = "";
+            quantityInput.value = "";
+            widthInput.value = "";
+            aspectRatioInput.value = "";
+            rimDiameterInput.value = "";
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to add tires to inventory.');
+        });
+    } else {
+        alert("Please fill all fields with valid values.");
+    }
+}
+
+// Function to sell tires from inventory
+function sellTires() {
+    const sellBrandInput = document.getElementById("sellBrand");
+    const sellQuantityInput = document.getElementById("sellQuantity");
+    const sellWidthInput = document.getElementById("sellWidth");
+    const sellAspectRatioInput = document.getElementById("sellAspectRatio");
+    const sellRimDiameterInput = document.getElementById("sellRimDiameter");
+    const sellNotesInput = document.getElementById("sellNotes");
+
+    const brand = sellBrandInput.value.trim();
+    const quantity = parseInt(sellQuantityInput.value);
+    const width = parseInt(sellWidthInput.value);
+    const aspectRatio = parseInt(sellAspectRatioInput.value);
+    const rimDiameter = parseInt(sellRimDiameterInput.value);
+    const sellNotes = sellNotesInput.value.trim();
+
+    if (brand && !isNaN(quantity) && !isNaN(width) && !isNaN(aspectRatio) && !isNaN(rimDiameter)) {
+        const size = `${width}/${aspectRatio}R${rimDiameter}`;
+        const tire = { brand, quantity, size, sellNotes };
+
+        fetch('/api/sell-tires', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(tire),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to sell tires.');
+            }
+            // Refresh inventory and sold tires after selling tires
+            updateInventory();
+            displayTiresSold();
+            alert('Tires sold successfully.');
+            // Clear input fields
+            sellBrandInput.value = "";
+            sellQuantityInput.value = "";
+            sellWidthInput.value = "";
+            sellAspectRatioInput.value = "";
+            sellRimDiameterInput.value = "";
+            sellNotesInput.value = "";
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to sell tires.');
+        });
+    } else {
+        alert("Please fill all fields with valid values.");
+    }
+}
+        // Function to fetch and display current inventory
+        function updateInventory() {
+            fetch('/api/inventory')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch inventory data.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const inventoryBody = document.getElementById('inventoryBody');
+                    inventoryBody.innerHTML = '';
+                    data.forEach(tire => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${tire.brand}</td>
+                            <td>${tire.quantity}</td>
+                            <td>${tire.size}</td>
+                        `;
+                        inventoryBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to fetch inventory data.');
+                });
+        }
+
+        // Function to fetch and display sold tires
+        function displayTiresSold() {
+            fetch('/api/sold-tires')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch sold tires data.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const tiresSoldDiv = document.getElementById('tiresSold');
+                    tiresSoldDiv.innerHTML = '';
+                    data.forEach(tire => {
+                        const div = document.createElement('div');
+                        let soldInfo = `${tire.quantity} ${tire.brand} ${tire.size} tires sold`;
+                        if (tire.sellNotes !== undefined) {
+                            soldInfo += `, Notes: ${tire.sellNotes}`;
+                        }
+                        div.textContent = soldInfo;
+                        tiresSoldDiv.appendChild(div);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to fetch sold tires data.');
+                });
+        }
+        // Initial display
+        updateInventory();
+        displayTiresSold();
+    </script>
+</body>
+</html>
